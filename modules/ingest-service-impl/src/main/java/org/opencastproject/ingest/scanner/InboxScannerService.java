@@ -127,9 +127,12 @@ public class InboxScannerService implements ArtifactInstaller, ManagedService {
   public static final String INBOX_METADATA_FFPROBE = "inbox.metadata.ffprobe";
   public static final String INBOX_SCHEDULE_MATCH = "inbox.schedule.match";
   public static final String INBOX_SCHEDULE_MATCH_THRESHOLD = "inbox.schedule.match.threshold";
+  public static final String INBOX_ALLOWED_FILEFORMATS = "inbox.allowed.fileformats";
+  
 
   public static final String FFPROBE_BINARY_CONFIG = "org.opencastproject.inspection.ffprobe.path";
   public static final String FFPROBE_BINARY_DEFAULT = "ffprobe";
+
 
   private IngestService ingestService;
   private SecurityService securityService;
@@ -171,6 +174,8 @@ public class InboxScannerService implements ArtifactInstaller, ManagedService {
     final Map<String, String> workflowConfig = getCfgAsMap(properties, WORKFLOW_CONFIG);
     final int interval = NumberUtils.toInt(Objects.toString(properties.get(INBOX_POLL), "5000"));
     final File inbox = new File(getCfg(properties, INBOX_PATH));
+    final String allowedFormats = getCfg(properties, INBOX_ALLOWED_FILEFORMATS);
+    
     if (!inbox.isDirectory()) {
       try {
         FileUtils.forceMkdir(inbox);
@@ -239,7 +244,7 @@ public class InboxScannerService implements ArtifactInstaller, ManagedService {
     this.ingestor = new Ingestor(ingestService, securityContext.get(), workflowDefinition,
             workflowConfig, mediaFlavor, inbox, maxThreads, seriesService, maxTries, secondsBetweenTries,
             metadataPattern, dateFormatter, schedulerService, ffprobe, matchSchedule, matchThreshold,
-            workspace);
+            workspace, allowedEndings);
     new Thread(ingestor).start();
     logger.info("Now watching inbox {}", inbox.getAbsolutePath());
   }
